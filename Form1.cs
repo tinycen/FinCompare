@@ -7,7 +7,7 @@ namespace FinCompare
 {
     public partial class Form1 : Form
     {
-        private DataTable dataTable = new DataTable();
+        private DataTable dataTable = new();
         private bool isCalculating = false; // 防止递归计算
 
         public Form1()
@@ -83,7 +83,7 @@ namespace FinCompare
             dataTable.Rows.Add(row);
         }
 
-        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        private void DataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             if (isCalculating || e.RowIndex < 0) return;
 
@@ -152,7 +152,7 @@ namespace FinCompare
             }
         }
 
-        private double CalculateAnnualRate(decimal principal, int periods, decimal monthlyInterest)
+        private static double CalculateAnnualRate(decimal principal, int periods, decimal monthlyInterest)
         {
             double principalAmount = (double)principal;
             double monthlyPayment = (double)(principal / periods + monthlyInterest);
@@ -185,21 +185,21 @@ namespace FinCompare
             return irr * 12 * 100; // 转换为年化百分比
         }
 
-        private decimal GetDecimalValue(object? value)
+        private static decimal GetDecimalValue(object? value)
         {
             if (value == null || value == DBNull.Value || string.IsNullOrEmpty(value.ToString())) return 0;
             if (decimal.TryParse(value.ToString(), out decimal result)) return result;
             return 0;
         }
 
-        private int GetIntValue(object? value)
+        private static int GetIntValue(object? value)
         {
             if (value == null || value == DBNull.Value || string.IsNullOrEmpty(value.ToString())) return 0;
             if (int.TryParse(value.ToString(), out int result)) return result;
             return 0;
         }
 
-        private void dataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void DataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             try
             {
@@ -231,7 +231,7 @@ namespace FinCompare
 
         private void 保存为CSVToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveFileDialog saveDialog = new SaveFileDialog
+            SaveFileDialog saveDialog = new()
             {
                 Filter = "CSV文件|*.csv",
                 Title = "保存为CSV文件"
@@ -247,7 +247,7 @@ namespace FinCompare
         {
             try
             {
-                StringBuilder csv = new StringBuilder();
+                StringBuilder csv = new();
                 
                 // 添加列标题
                 string[] headers = new string[dataTable.Columns.Count];
@@ -261,9 +261,9 @@ namespace FinCompare
                 foreach (DataRow row in dataTable.Rows)
                 {
                     string[] fields = new string[dataTable.Columns.Count];
-                    for (int i = 0; i < dataTable.Columns.Count; i++)
+                    for (int j = 0; j < dataTable.Columns.Count; j++)
                     {
-                        fields[i] = row[i]?.ToString() ?? "";
+                        fields[j] = row[j]?.ToString() ?? "";
                     }
                     csv.AppendLine(string.Join(",", fields.Select(EscapeCsvField)));
                 }
@@ -277,9 +277,9 @@ namespace FinCompare
             }
         }
 
-        private string EscapeCsvField(string field)
+        private static string EscapeCsvField(string field)
         {
-            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
+            if (field.Contains(',') || field.Contains('"') || field.Contains('\n'))
             {
                 return "\"" + field.Replace("\"", "\"\"") + "\"";
             }
@@ -288,7 +288,7 @@ namespace FinCompare
 
         private void 加载CSVToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openDialog = new OpenFileDialog
+            OpenFileDialog openDialog = new()
             {
                 Filter = "CSV文件|*.csv",
                 Title = "加载CSV文件"
@@ -336,11 +336,11 @@ namespace FinCompare
             }
         }
 
-        private string[] ParseCsvLine(string line)
+        private static string[] ParseCsvLine(string line)
         {
-            List<string> fields = new List<string>();
+            List<string> fields = [];
             bool inQuotes = false;
-            StringBuilder currentField = new StringBuilder();
+            StringBuilder currentField = new();
 
             for (int i = 0; i < line.Length; i++)
             {
@@ -370,10 +370,10 @@ namespace FinCompare
             }
             
             fields.Add(currentField.ToString());
-            return fields.ToArray();
+            return [.. fields];
         }
 
-        private object ConvertToColumnType(string value, Type targetType)
+        private static object ConvertToColumnType(string value, Type targetType)
         {
             if (string.IsNullOrEmpty(value)) return DBNull.Value;
 

@@ -1,4 +1,4 @@
-﻿namespace FinCompare
+namespace FinCompare
 {
     partial class Form1
     {
@@ -47,8 +47,8 @@
             dataGridView1.Name = "dataGridView1";
             dataGridView1.Size = new Size(1160, 502);
             dataGridView1.TabIndex = 0;
-            dataGridView1.CellValueChanged += dataGridView1_CellValueChanged;
-            dataGridView1.ColumnHeaderMouseClick += dataGridView1_ColumnHeaderMouseClick;
+            dataGridView1.CellValueChanged += DataGridView1_CellValueChanged;
+            dataGridView1.ColumnHeaderMouseClick += DataGridView1_ColumnHeaderMouseClick;
             // 
             // menuStrip1
             // 
