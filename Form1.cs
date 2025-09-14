@@ -67,6 +67,55 @@ namespace FinCompare
             {
                 column.SortMode = DataGridViewColumnSortMode.Programmatic;
             }
+
+            // 添加单元格格式化事件处理
+            dataGridView1.CellFormatting += DataGridView1_CellFormatting;
+        }
+
+        private void DataGridView1_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            // 处理借款/分期金额列（索引1）和总利息列（索引4）
+            if (e.ColumnIndex == 1 || e.ColumnIndex == 4)
+            {
+                if (e.Value != null && e.Value != DBNull.Value)
+                {
+                    if (decimal.TryParse(e.Value.ToString(), out decimal value))
+                    {
+                        // 检查小数部分是否为0
+                        if (value == Math.Floor(value))
+                        {
+                            // 小数部分为.00，显示为整数
+                            e.Value = value.ToString("N0");
+                        }
+                        else
+                        {
+                            // 小数部分不为0，显示两位小数
+                            e.Value = value.ToString("N2");
+                        }
+                        e.FormattingApplied = true;
+                    }
+                }
+            }
+
+            // 处理平均每期利息列（索引3）
+            if (e.ColumnIndex == 3)
+            {
+                if (e.Value != null && e.Value != DBNull.Value)
+                {
+                    if (decimal.TryParse(e.Value.ToString(), out decimal value))
+                    {
+                        if (value == Math.Floor(value))
+                        {
+                            e.Value = value.ToString("N0");
+                        }
+                        else
+                        {
+                            e.Value = value.ToString("N2");
+                        }
+                        e.FormattingApplied = true;
+                    }
+                }
+            }
         }
 
         private void AddSampleRow()
