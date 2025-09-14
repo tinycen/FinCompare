@@ -43,6 +43,9 @@ namespace FinCompare
             dataGridView1.AllowUserToDeleteRows = true;
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             
+            // 启用排序功能
+            dataGridView1.AllowUserToOrderColumns = true;
+            
             // 设置列宽比例
             dataGridView1.Columns[0].FillWeight = 15; // 名称/机构
             dataGridView1.Columns[1].FillWeight = 15; // 借款/分期金额
@@ -52,22 +55,28 @@ namespace FinCompare
             dataGridView1.Columns[5].FillWeight = 10; // 利息率
             dataGridView1.Columns[6].FillWeight = 15; // 近似折算年化利率
             dataGridView1.Columns[7].FillWeight = 15; // 添加时间
-
+        
             // 设置数值列的格式
             dataGridView1.Columns[1].DefaultCellStyle.Format = "N2";
             dataGridView1.Columns[3].DefaultCellStyle.Format = "N2";
             dataGridView1.Columns[4].DefaultCellStyle.Format = "N2";
             dataGridView1.Columns[7].DefaultCellStyle.Format = "yyyy-MM-dd HH:mm:ss";
+        
+            // 设置列的排序模式
+            foreach (DataGridViewColumn column in dataGridView1.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.Programmatic;
+            }
         }
 
         private void AddSampleRow()
         {
             DataRow row = dataTable.NewRow();
             row["名称/机构"] = "";
-            row["借款/分期金额"] = DBNull.Value;
-            row["期数"] = DBNull.Value;
-            row["平均每期利息"] = DBNull.Value;
-            row["总利息"] = DBNull.Value;
+            row["借款/分期金额"] = 0m;
+            row["期数"] = 0;
+            row["平均每期利息"] = 0m;
+            row["总利息"] = 0m;
             row["利息率"] = "";
             row["近似折算年化利率（单利）"] = "";
             row["添加时间"] = DateTime.Now;
@@ -98,11 +107,17 @@ namespace FinCompare
             {
                 DataGridViewRow row = dataGridView1.Rows[rowIndex];
                 
-                // 获取基础数据
+                // 获取基础数据并确保数值字段不为空
                 decimal principal = GetDecimalValue(row.Cells["借款/分期金额"].Value);
                 int periods = GetIntValue(row.Cells["期数"].Value);
                 decimal monthlyInterest = GetDecimalValue(row.Cells["平均每期利息"].Value);
                 decimal totalInterest = GetDecimalValue(row.Cells["总利息"].Value);
+
+                // 确保数值字段显示为0而不是空值
+                row.Cells["借款/分期金额"].Value = principal;
+                row.Cells["期数"].Value = periods;
+                row.Cells["平均每期利息"].Value = monthlyInterest;
+                row.Cells["总利息"].Value = totalInterest;
 
                 if (principal <= 0 || periods <= 0) return;
 
@@ -172,32 +187,46 @@ namespace FinCompare
 
         private decimal GetDecimalValue(object? value)
         {
-            if (value == null || value == DBNull.Value) return 0;
+            if (value == null || value == DBNull.Value || string.IsNullOrEmpty(value.ToString())) return 0;
             if (decimal.TryParse(value.ToString(), out decimal result)) return result;
             return 0;
         }
 
         private int GetIntValue(object? value)
         {
-            if (value == null || value == DBNull.Value) return 0;
+            if (value == null || value == DBNull.Value || string.IsNullOrEmpty(value.ToString())) return 0;
             if (int.TryParse(value.ToString(), out int result)) return result;
             return 0;
         }
 
         private void dataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            // 实现排序功能
-            DataGridViewColumn column = dataGridView1.Columns[e.ColumnIndex];
-            ListSortDirection direction = ListSortDirection.Ascending;
-
-            // 如果点击的是当前已排序的列且当前是升序，则切换为降序
-            if (dataGridView1.SortedColumn == column && dataGridView1.SortOrder == SortOrder.Ascending)
+            try
             {
-                direction = ListSortDirection.Descending;
+                DataGridViewColumn column = dataGridView1.Columns[e.ColumnIndex];
+                
+                // 确定排序方向
+                ListSortDirection direction;
+                if (dataGridView1.SortedColumn == column && dataGridView1.SortOrder == SortOrder.Ascending)
+                {
+                    direction = ListSortDirection.Descending;
+                }
+                else
+                {
+                    direction = ListSortDirection.Ascending;
+                }
+        
+                // 使用DataView排序
+                string columnName = dataTable.Columns[e.ColumnIndex].ColumnName;
+                dataTable.DefaultView.Sort = $"[{columnName}] {(direction == ListSortDirection.Ascending ? "ASC" : "DESC")}";
+        
+                // 更新DataGridView排序状态
+                dataGridView1.Sort(column, direction);
             }
-            // 否则默认使用升序（包括第一次点击和点击其他列的情况）
-
-            dataGridView1.Sort(column, direction);
+            catch (Exception ex)
+            {
+                MessageBox.Show($"排序时发生错误：{ex.Message}", "排序错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void 保存为CSVToolStripMenuItem_Click(object sender, EventArgs e)
