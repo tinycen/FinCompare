@@ -47,13 +47,13 @@ namespace FinCompare
             dataGridView1.AllowUserToOrderColumns = true;
             
             // 设置列宽比例
-            dataGridView1.Columns[0].FillWeight = 15; // 名称/机构
+            dataGridView1.Columns[0].FillWeight = 20; // 名称/机构
             dataGridView1.Columns[1].FillWeight = 15; // 借款/分期金额
-            dataGridView1.Columns[2].FillWeight = 10; // 期数
-            dataGridView1.Columns[3].FillWeight = 15; // 平均每期利息
-            dataGridView1.Columns[4].FillWeight = 15; // 总利息
-            dataGridView1.Columns[5].FillWeight = 10; // 利息率
-            dataGridView1.Columns[6].FillWeight = 15; // 近似折算年化利率
+            dataGridView1.Columns[2].FillWeight = 8;  // 期数 - 缩小
+            dataGridView1.Columns[3].FillWeight = 10; // 平均每期利息
+            dataGridView1.Columns[4].FillWeight = 8;  // 总利息 - 缩小并与期数、利息率保持一致
+            dataGridView1.Columns[5].FillWeight = 8;  // 利息率 - 缩小并与期数、总利息保持一致
+            dataGridView1.Columns[6].FillWeight = 20; // 近似折算年化利率 - 增大列宽
             dataGridView1.Columns[7].FillWeight = 15; // 添加时间
         
             // 设置数值列的格式
